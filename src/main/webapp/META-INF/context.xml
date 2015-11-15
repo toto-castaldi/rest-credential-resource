@@ -1,0 +1,9 @@
+<Context path="/" reloadable="true" allowLinking="true" crossContext="true"  >
+
+    <Resource name="jdbc/example" auth="Container" type="javax.sql.DataSource"
+              maxActive="30" maxIdle="20" maxWait="10000"
+              username="example" password="example" driverClassName="org.postgresql.Driver"
+              url="jdbc:postgresql://localhost/example"/>
+
+
+</Context>
