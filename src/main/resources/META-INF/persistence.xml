@@ -8,7 +8,7 @@
 	<persistence-unit name="jpa-unit" transaction-type="RESOURCE_LOCAL">
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 		
-		<non-jta-data-source>java:comp/env/jdbc/example</non-jta-data-source>
+		<non-jta-data-source>java:comp/env/jdbc/cred</non-jta-data-source>
 		<mapping-file>META-INF/orm-common.xml</mapping-file>
 
 		<properties>		

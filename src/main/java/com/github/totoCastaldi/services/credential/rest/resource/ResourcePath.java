@@ -1,4 +1,4 @@
-package com.github.totoCastaldi.services.credential.restResource;
+package com.github.totoCastaldi.services.credential.rest.resource;
 
 /**
  * Created by toto on 15/11/15.

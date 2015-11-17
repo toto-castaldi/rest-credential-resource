@@ -1,8 +1,12 @@
-package com.github.totoCastaldi.services.credential.restResource;
+package com.github.totoCastaldi.services.credential.rest;
 
 import com.github.totoCastaldi.restServer.ApiServletContextListener;
 import com.github.totoCastaldi.restServer.RestServerConf;
 import com.github.totoCastaldi.restServer.plugin.PersistenModule;
+import com.github.totoCastaldi.services.credential.rest.model.UserDao;
+import com.github.totoCastaldi.services.credential.rest.resource.UserResource;
+import com.github.totoCastaldi.services.credential.rest.service.UserMailActivation;
+import com.github.totoCastaldi.services.credential.rest.service.UserPassword;
 import com.google.inject.AbstractModule;
 
 public class ContextListener extends ApiServletContextListener {
@@ -14,11 +18,14 @@ public class ContextListener extends ApiServletContextListener {
         builder.add(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(ExampleResourceSupport.class);
                 bind(UserDao.class);
+                bind(UserMailActivation.class);
+                bind(ApiErrors.class);
+                bind(UserPassword.class);
             }
         });
         builder.add(new PersistenModule());
+        builder.addStringConf(Conf.PASSWORD_SEED);
         return builder.build();
     }
 }

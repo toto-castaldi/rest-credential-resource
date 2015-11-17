@@ -7,7 +7,7 @@
     </absolute-ordering>
 
     <listener>
-        <listener-class>com.github.totoCastaldi.services.credential.restResource.ContextListener</listener-class>
+        <listener-class>com.github.totoCastaldi.services.credential.rest.ContextListener</listener-class>
     </listener>
 
 
