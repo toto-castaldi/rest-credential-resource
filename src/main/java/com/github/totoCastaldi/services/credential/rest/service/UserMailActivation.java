@@ -33,7 +33,7 @@ public class UserMailActivation {
         this.emailPassword = emailPassword;
     }
 
-    public boolean sendEmail(String emailAddress)  {
+    public boolean sendEmail(String emailAddress, String token, String urlBaseConfirm)  {
         Email email = new SimpleEmail();
         email.setHostName("smtp.googlemail.com");
         email.setSmtpPort(465);
@@ -42,7 +42,7 @@ public class UserMailActivation {
         try {
             email.setFrom(emailAddress);
             email.setSubject("TestMail");
-            email.setMsg("This is a test mail ... :-)");
+            email.setMsg("Confirm here " + urlBaseConfirm + "?e=" + emailAddress + "&t=" + token);
             email.addTo(emailAddress);
             final String sendResult = email.send();
 

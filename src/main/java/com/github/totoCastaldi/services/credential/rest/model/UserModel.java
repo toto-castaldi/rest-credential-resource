@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 /**
  * Created by toto on 16/11/15.
@@ -31,4 +32,15 @@ public class UserModel {
     @NotNull
     @Setter
     private String password;
+
+    @Setter
+    private String urlNotifier;
+
+    @Setter
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date creationDate;
+
+    @Setter
+    @Enumerated (EnumType.STRING)
+    private UserState userState;
 }

@@ -8,4 +8,5 @@ public class Conf {
     public static final String MAIL_USERNAME = "MAIL_USERNAME";
     public static final String MAIL_PASSWORD = "MAIL_PASSWORD";
     public static final String MAIL_ADDRESS = "MAIL_ADDRESS";
+    public static final String CONFIRM_TOKEN_SEED = "CONFIRM_TOKEN_SEED";
 }

@@ -1,5 +1,6 @@
 package com.github.totoCastaldi.services.credential.rest.model;
 
+import com.github.totoCastaldi.restServer.TimeProvider;
 import com.github.totoCastaldi.services.credential.rest.service.UserPassword;
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
@@ -16,20 +17,26 @@ public class UserDao {
 
     private final EntityManager entityManager;
     private final UserPassword userPassword;
+    private final TimeProvider timeProvider;
 
     @Inject
     public UserDao(
             EntityManager entityManager,
-            UserPassword userPassword
+            UserPassword userPassword,
+            TimeProvider timeProvider
     ) {
-
         this.entityManager = entityManager;
         this.userPassword = userPassword;
+        this.timeProvider = timeProvider;
     }
 
 
     @Transactional
-    public Optional<UserModel> create(String email, String password) {
+    public Optional<UserModel> create(
+            String email,
+            String password,
+            String urlNotifier
+    ) {
         Optional<UserModel> existant = getByEmail(email);
         if (existant.isPresent()) {
             return Optional.absent();
@@ -37,6 +44,9 @@ public class UserDao {
             UserModel userModel = new UserModel();
             userModel.setEmail(email);
             userModel.setPassword(userPassword.getPassword(email, password));
+            userModel.setCreationDate(timeProvider.now());
+            userModel.setUserState(UserState.LIGTH);
+            userModel.setUrlNotifier(urlNotifier);
             entityManager.persist(userModel);
             entityManager.flush();
             return Optional.of(userModel);

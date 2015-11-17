@@ -23,4 +23,7 @@ public class CreateUserRequest {
     private String email;
     @NotBlank
     private String password;
+    private String urlNotifier;
+    @NotBlank
+    private String urlBaseConfirm;
 }

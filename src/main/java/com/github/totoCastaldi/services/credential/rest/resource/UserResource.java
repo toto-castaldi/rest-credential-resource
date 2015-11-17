@@ -4,6 +4,7 @@ import com.github.totoCastaldi.restServer.response.ApiResponse;
 import com.github.totoCastaldi.services.credential.rest.model.UserDao;
 import com.github.totoCastaldi.services.credential.rest.model.UserModel;
 import com.github.totoCastaldi.services.credential.rest.request.CreateUserRequest;
+import com.github.totoCastaldi.services.credential.rest.service.UserConfirmToken;
 import com.github.totoCastaldi.services.credential.rest.service.UserMailActivation;
 import com.google.common.base.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -30,16 +31,19 @@ public class UserResource {
     private final ApiResponse apiResponse;
     private final UserDao userDao;
     private final UserMailActivation userMailActivation;
+    private final UserConfirmToken userConfirmToken;
 
     @Inject
     public UserResource(
             ApiResponse apiResponse,
             UserDao userDao,
-            UserMailActivation userMailActivation
+            UserMailActivation userMailActivation,
+            UserConfirmToken userConfirmToken
     ) {
         this.apiResponse = apiResponse;
         this.userDao = userDao;
         this.userMailActivation = userMailActivation;
+        this.userConfirmToken = userConfirmToken;
     }
 
     @POST
@@ -49,10 +53,12 @@ public class UserResource {
             @Context HttpServletRequest httpServletRequest,
             @NotNull @Valid CreateUserRequest request
     ) {
-        Optional<UserModel> userModelOptional = userDao.create(request.getEmail(), request.getPassword());
+        Optional<UserModel> userModelOptional = userDao.create(request.getEmail(), request.getPassword(), request.getUrlNotifier());
         if (userModelOptional.isPresent()) {
-            if (userMailActivation.sendEmail(userModelOptional.get().getEmail())) {
-                return apiResponse.createdReturns(httpServletRequest, ResourcePath.USER, String.valueOf(userModelOptional.get().getId()));
+            final UserModel userModel = userModelOptional.get();
+            final String token = userConfirmToken.generateToken(userModel.getEmail());
+            if (userMailActivation.sendEmail(userModel.getEmail(), token, request.getUrlBaseConfirm())) {
+                return apiResponse.createdReturns(httpServletRequest, ResourcePath.USER, String.valueOf(userModel.getId()));
             } else {
                 return apiResponse.badResponse("can't send email");
             }
