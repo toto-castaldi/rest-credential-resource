@@ -4,21 +4,17 @@ import com.github.totoCastaldi.restServer.response.ApiResponse;
 import com.github.totoCastaldi.services.credential.rest.model.UserDao;
 import com.github.totoCastaldi.services.credential.rest.model.UserModel;
 import com.github.totoCastaldi.services.credential.rest.request.CreateUserRequest;
-import com.github.totoCastaldi.services.credential.rest.response.CreateUserReponse;
+import com.github.totoCastaldi.services.credential.rest.request.ValidateTokenRequest;
 import com.github.totoCastaldi.services.credential.rest.service.UserConfirmToken;
 import com.github.totoCastaldi.services.credential.rest.service.UserMailActivation;
 import com.google.common.base.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.BooleanUtils;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -26,52 +22,52 @@ import javax.ws.rs.core.Response;
 /**
  * Created by github on 05/12/14.
  */
-@Path(ResourcePath.USER)
+@Path(ResourcePath.CONFIR_TOKEN)
 @Slf4j
-public class UserResource {
+public class ConfirmTokenResource {
 
     private final ApiResponse apiResponse;
     private final UserDao userDao;
-    private final UserMailActivation userMailActivation;
     private final UserConfirmToken userConfirmToken;
 
     @Inject
-    public UserResource(
+    public ConfirmTokenResource(
             ApiResponse apiResponse,
             UserDao userDao,
-            UserMailActivation userMailActivation,
             UserConfirmToken userConfirmToken
     ) {
         this.apiResponse = apiResponse;
         this.userDao = userDao;
-        this.userMailActivation = userMailActivation;
         this.userConfirmToken = userConfirmToken;
     }
 
-    @POST
+    @PUT
+    @Path(ResourcePath.p_P0)
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response on(
+    public Response validateToken(
             @Context HttpServletRequest httpServletRequest,
-            @NotNull @Valid CreateUserRequest request
+            @PathParam(ResourcePath.P0) String token,
+            @NotNull @Valid ValidateTokenRequest request
     ) {
-        Optional<UserModel> userModelOptional = userDao.create(request.getEmail(), request.getPassword(), request.getUrlNotifier());
+        log.info("validateToken {} {}", token, request);
+
+        final String email = request.getEmail();
+        final Optional<UserModel> userModelOptional = userDao.getByEmail(email);
+
         if (userModelOptional.isPresent()) {
-            final UserModel userModel = userModelOptional.get();
-            final String token = userConfirmToken.generateToken(userModel.getEmail());
-            boolean proceed = BooleanUtils.isTrue(request.getSkipEmailSend());
-            if (!proceed) {
-                proceed = userMailActivation.sendEmail(userModel.getEmail(), token, request.getUrlBaseConfirm());
-            }
-            if (proceed) {
-                CreateUserReponse createUserReponse = CreateUserReponse.of(token);
-                return apiResponse.createdReturns(httpServletRequest, createUserReponse, ResourcePath.USER, String.valueOf(userModel.getId()));
+            if (userConfirmToken.isCorrect(email, token)) {
+                final Optional<UserModel> confirmedOptional = userDao.confirmed(email);
+                if (confirmedOptional.isPresent()) {
+                    return apiResponse.ok();
+                } else {
+                    return apiResponse.notFound();
+                }
             } else {
-                return apiResponse.badResponse("can't send email");
+                return apiResponse.badResponse("wrong token or email");
             }
         } else {
-            //already exist but return a generic error in order to hide data
-            return apiResponse.badResponse();
+            return apiResponse.notFound();
         }
     }
 

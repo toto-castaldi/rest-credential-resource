@@ -17,14 +17,8 @@ import org.hibernate.validator.constraints.NotBlank;
 @Getter
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CreateUserRequest {
+public class ValidateTokenRequest {
     @Email
     @NotBlank
     private String email;
-    @NotBlank
-    private String password;
-    private String urlNotifier;
-    @NotBlank
-    private String urlBaseConfirm;
-    private Boolean skipEmailSend;
 }

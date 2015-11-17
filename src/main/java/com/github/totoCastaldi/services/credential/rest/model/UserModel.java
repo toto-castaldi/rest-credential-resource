@@ -31,7 +31,7 @@ public class UserModel {
     @NonNull
     @NotNull
     @Setter
-    private String password;
+    private String encodedPassword;
 
     @Setter
     private String urlNotifier;

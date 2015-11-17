@@ -43,7 +43,7 @@ public class UserDao {
         } else {
             UserModel userModel = new UserModel();
             userModel.setEmail(email);
-            userModel.setPassword(userPassword.getPassword(email, password));
+            userModel.setEncodedPassword(userPassword.encodePassword(email, password));
             userModel.setCreationDate(timeProvider.now());
             userModel.setUserState(UserState.LIGTH);
             userModel.setUrlNotifier(urlNotifier);
@@ -57,5 +57,19 @@ public class UserDao {
         Query query = entityManager.createNamedQuery(UserModel.NQfindByEmail);
         query.setParameter("email", email);
         return Optional.fromNullable((UserModel) Iterables.getFirst(query.getResultList(), null));
+    }
+
+    @Transactional
+    public Optional<UserModel> confirmed(String email) {
+        final Optional<UserModel> byEmail = getByEmail(email);
+        if (byEmail.isPresent()) {
+            final UserModel userModel = byEmail.get();
+            userModel.setUserState(UserState.CONFIRMED);
+            entityManager.persist(userModel);
+            entityManager.flush();
+            return Optional.of(userModel);
+        } else {
+            return Optional.absent();
+        }
     }
 }
