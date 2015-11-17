@@ -20,12 +20,14 @@ public class ContextListener extends ApiServletContextListener {
             protected void configure() {
                 bind(UserDao.class);
                 bind(UserMailActivation.class);
-                bind(ApiErrors.class);
                 bind(UserPassword.class);
             }
         });
         builder.add(new PersistenModule());
         builder.addStringConf(Conf.PASSWORD_SEED);
+        builder.addStringConf(Conf.MAIL_USERNAME);
+        builder.addStringConf(Conf.MAIL_PASSWORD);
+        builder.addStringConf(Conf.MAIL_ADDRESS);
         return builder.build();
     }
 }

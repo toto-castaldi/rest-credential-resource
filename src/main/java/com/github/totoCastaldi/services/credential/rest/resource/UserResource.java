@@ -1,7 +1,6 @@
 package com.github.totoCastaldi.services.credential.rest.resource;
 
 import com.github.totoCastaldi.restServer.response.ApiResponse;
-import com.github.totoCastaldi.services.credential.rest.ApiErrors;
 import com.github.totoCastaldi.services.credential.rest.model.UserDao;
 import com.github.totoCastaldi.services.credential.rest.model.UserModel;
 import com.github.totoCastaldi.services.credential.rest.request.CreateUserRequest;
@@ -31,19 +30,16 @@ public class UserResource {
     private final ApiResponse apiResponse;
     private final UserDao userDao;
     private final UserMailActivation userMailActivation;
-    private final ApiErrors apiErrors;
 
     @Inject
     public UserResource(
             ApiResponse apiResponse,
             UserDao userDao,
-            UserMailActivation userMailActivation,
-            ApiErrors apiErrors
+            UserMailActivation userMailActivation
     ) {
         this.apiResponse = apiResponse;
         this.userDao = userDao;
         this.userMailActivation = userMailActivation;
-        this.apiErrors = apiErrors;
     }
 
     @POST
@@ -58,11 +54,11 @@ public class UserResource {
             if (userMailActivation.sendEmail(userModelOptional.get().getEmail())) {
                 return apiResponse.createdReturns(httpServletRequest, ResourcePath.USER, String.valueOf(userModelOptional.get().getId()));
             } else {
-                return apiResponse.badResponse(httpServletRequest);
+                return apiResponse.badResponse("can't send email");
             }
         } else {
-            //already exist but return a generic error
-            return apiResponse.badResponse(httpServletRequest);
+            //already exist but return a generic error in order to hide data
+            return apiResponse.badResponse();
         }
     }
 
