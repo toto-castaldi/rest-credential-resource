@@ -15,44 +15,36 @@ import javax.inject.Named;
  * Created by toto on 16/11/15.
  */
 @Slf4j
-public class UserMailActivation {
+public class UserEmailActivation {
 
     private final String emailAddress;
     private final String emailUsername;
     private final String emailPassword;
 
     @Inject
-    public UserMailActivation(
+    public UserEmailActivation(
         @Named (Conf.MAIL_ADDRESS) String emailAddress,
         @Named (Conf.MAIL_USERNAME) String emailUsername,
         @Named (Conf.MAIL_PASSWORD) String emailPassword
     ) {
-
         this.emailAddress = emailAddress;
         this.emailUsername = emailUsername;
         this.emailPassword = emailPassword;
     }
 
     public boolean sendEmail(String emailAddress, String token, String urlBaseConfirm)  {
-        Email email = new SimpleEmail();
-        email.setHostName("smtp.googlemail.com");
-        email.setSmtpPort(465);
-        email.setAuthenticator(new DefaultAuthenticator(emailUsername, emailPassword));
-        email.setSSLOnConnect(true);
-        try {
-            email.setFrom(emailAddress);
-            email.setSubject("TestMail");
-            email.setMsg("Confirm here " + urlBaseConfirm + "?e=" + emailAddress + "&t=" + token);
-            email.addTo(emailAddress);
-            final String sendResult = email.send();
+        return new UserEmail(emailAddress, emailUsername, emailPassword) {
 
-            log.info("sending email {}", sendResult);
+            @Override
+            protected String getMessage() {
+                return "Confirm here " + urlBaseConfirm + "?e=" + emailAddress + "&t=" + token;
+            }
 
-            return true;
-        } catch (EmailException e) {
-            log.error(StringUtils.EMPTY, e);
-            return false;
-        }
-
+            @Override
+            protected String getSubject() {
+                return "confirm your email";
+            }
+        }.sendEmail(emailAddress);
     }
+
 }

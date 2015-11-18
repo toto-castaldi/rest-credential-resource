@@ -15,6 +15,7 @@ public class ResourcePath {
 
     public static final String USER = "user";
     public static final String CONFIR_TOKEN = "confirmToken";
+    public static final String PASSWORD_LOST = "passwordLost";
 
     //public static final String EMAIL_AND_TOKEN = p_P0 + SLASH + p_P1;
 }

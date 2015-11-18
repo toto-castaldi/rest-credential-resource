@@ -6,7 +6,7 @@ import com.github.totoCastaldi.services.credential.rest.model.UserModel;
 import com.github.totoCastaldi.services.credential.rest.request.CreateUserRequest;
 import com.github.totoCastaldi.services.credential.rest.response.CreateUserReponse;
 import com.github.totoCastaldi.services.credential.rest.service.UserConfirmToken;
-import com.github.totoCastaldi.services.credential.rest.service.UserMailActivation;
+import com.github.totoCastaldi.services.credential.rest.service.UserEmailActivation;
 import com.google.common.base.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.BooleanUtils;
@@ -32,19 +32,19 @@ public class UserResource {
 
     private final ApiResponse apiResponse;
     private final UserDao userDao;
-    private final UserMailActivation userMailActivation;
+    private final UserEmailActivation userEmailActivation;
     private final UserConfirmToken userConfirmToken;
 
     @Inject
     public UserResource(
             ApiResponse apiResponse,
             UserDao userDao,
-            UserMailActivation userMailActivation,
+            UserEmailActivation userEmailActivation,
             UserConfirmToken userConfirmToken
     ) {
         this.apiResponse = apiResponse;
         this.userDao = userDao;
-        this.userMailActivation = userMailActivation;
+        this.userEmailActivation = userEmailActivation;
         this.userConfirmToken = userConfirmToken;
     }
 
@@ -61,7 +61,7 @@ public class UserResource {
             final String token = userConfirmToken.generateToken(userModel.getEmail());
             boolean proceed = BooleanUtils.isTrue(request.getSkipEmailSend());
             if (!proceed) {
-                proceed = userMailActivation.sendEmail(userModel.getEmail(), token, request.getUrlBaseConfirm());
+                proceed = userEmailActivation.sendEmail(userModel.getEmail(), token, request.getUrlBaseConfirm());
             }
             if (proceed) {
                 CreateUserReponse createUserReponse = CreateUserReponse.of(token);

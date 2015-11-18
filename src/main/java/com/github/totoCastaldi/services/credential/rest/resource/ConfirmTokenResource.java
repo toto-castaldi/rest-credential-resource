@@ -3,10 +3,8 @@ package com.github.totoCastaldi.services.credential.rest.resource;
 import com.github.totoCastaldi.restServer.response.ApiResponse;
 import com.github.totoCastaldi.services.credential.rest.model.UserDao;
 import com.github.totoCastaldi.services.credential.rest.model.UserModel;
-import com.github.totoCastaldi.services.credential.rest.request.CreateUserRequest;
 import com.github.totoCastaldi.services.credential.rest.request.ValidateTokenRequest;
 import com.github.totoCastaldi.services.credential.rest.service.UserConfirmToken;
-import com.github.totoCastaldi.services.credential.rest.service.UserMailActivation;
 import com.google.common.base.Optional;
 import lombok.extern.slf4j.Slf4j;
 
