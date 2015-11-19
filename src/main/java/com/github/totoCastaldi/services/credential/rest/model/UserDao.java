@@ -3,9 +3,11 @@ package com.github.totoCastaldi.services.credential.rest.model;
 import com.github.totoCastaldi.restServer.TimeProvider;
 import com.github.totoCastaldi.services.credential.rest.service.UserPassword;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.inject.persist.Transactional;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -37,7 +39,7 @@ public class UserDao {
             String password,
             String urlNotifier
     ) {
-        Optional<UserModel> existant = getByEmail(email);
+        Optional<UserModel> existant = getValidUserByEmail(email);
         if (existant.isPresent()) {
             return Optional.absent();
         } else {
@@ -53,15 +55,21 @@ public class UserDao {
         }
     }
 
-    public Optional<UserModel> getByEmail(String email) {
+    public Optional<UserModel> getValidUserByEmail(String email) {
         Query query = entityManager.createNamedQuery(UserModel.NQfindByEmail);
         query.setParameter("email", email);
-        return Optional.fromNullable((UserModel) Iterables.getFirst(query.getResultList(), null));
+        return Optional.fromNullable((UserModel) Iterables.getFirst(Iterables.filter(query.getResultList(), new Predicate() {
+            @Override
+            public boolean apply(@Nullable Object input) {
+                UserModel userModel = (UserModel) input;
+                return userModel.getUserState() != UserState.DELETED;
+            }
+        }), null));
     }
 
     @Transactional
     public Optional<UserModel> confirmed(String email) {
-        final Optional<UserModel> byEmail = getByEmail(email);
+        final Optional<UserModel> byEmail = getValidUserByEmail(email);
         if (byEmail.isPresent()) {
             final UserModel userModel = byEmail.get();
             userModel.setUserState(UserState.CONFIRMED);
@@ -73,4 +81,18 @@ public class UserDao {
         }
     }
 
+    @Transactional
+    public Optional<UserModel> updatePassword(String email, String password) {
+        Optional<UserModel> existant = getValidUserByEmail(email);
+        if (existant.isPresent()) {
+            UserModel userModel = existant.get();
+            userModel.setEncodedPassword(userPassword.encodePassword(email, password));
+            entityManager.persist(userModel);
+            entityManager.flush();
+            return Optional.of(userModel);
+        } else {
+            return Optional.absent();
+        }
+
+    }
 }

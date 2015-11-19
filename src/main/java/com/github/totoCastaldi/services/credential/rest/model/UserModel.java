@@ -41,6 +41,10 @@ public class UserModel {
     private Date creationDate;
 
     @Setter
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date deletionDate;
+
+    @Setter
     @Enumerated (EnumType.STRING)
     private UserState userState;
 }

@@ -51,7 +51,7 @@ public class ConfirmTokenResource {
         log.info("validateToken {} {}", token, request);
 
         final String email = request.getEmail();
-        final Optional<UserModel> userModelOptional = userDao.getByEmail(email);
+        final Optional<UserModel> userModelOptional = userDao.getValidUserByEmail(email);
 
         if (userModelOptional.isPresent()) {
             if (userConfirmToken.isCorrect(email, token)) {

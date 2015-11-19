@@ -5,5 +5,6 @@ package com.github.totoCastaldi.services.credential.rest.model;
  */
 public enum UserState {
     LIGTH,
-    CONFIRMED
+    CONFIRMED,
+    DELETED
 }

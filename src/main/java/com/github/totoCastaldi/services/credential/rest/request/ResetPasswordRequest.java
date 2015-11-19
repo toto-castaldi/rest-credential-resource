@@ -16,11 +16,10 @@ import org.hibernate.validator.constraints.NotBlank;
 @Getter
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PasswordLostRequest {
-    @NotBlank
-    private String baseUrl;
+public class ResetPasswordRequest {
     @NotBlank
     @Email
     private String email;
-    private Boolean skipEmailSend;
+    @NotBlank
+    private String password;
 }
