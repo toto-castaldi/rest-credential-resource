@@ -23,6 +23,7 @@ public class ContextListener extends ApiServletContextListener {
                 bind(UserPassword.class);
                 bind(UserConfirmToken.class);
                 bind(UserPasswordLostToken.class);
+                bind(UserChange.class);
             }
         });
         builder.add(new PersistenModule());

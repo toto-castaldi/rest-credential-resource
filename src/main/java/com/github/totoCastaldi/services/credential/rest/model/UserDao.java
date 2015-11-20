@@ -32,6 +32,10 @@ public class UserDao {
         this.timeProvider = timeProvider;
     }
 
+    public static interface ChangeOnUser {
+        void change(UserModel userModel);
+    }
+
 
     @Transactional
     public Optional<UserModel> create(
@@ -69,30 +73,45 @@ public class UserDao {
 
     @Transactional
     public Optional<UserModel> confirmed(String email) {
-        final Optional<UserModel> byEmail = getValidUserByEmail(email);
-        if (byEmail.isPresent()) {
-            final UserModel userModel = byEmail.get();
-            userModel.setUserState(UserState.CONFIRMED);
-            entityManager.persist(userModel);
-            entityManager.flush();
-            return Optional.of(userModel);
-        } else {
-            return Optional.absent();
-        }
+        return ifExistValid(email, new ChangeOnUser() {
+            @Override
+            public void change(UserModel userModel) {
+                userModel.setUserState(UserState.CONFIRMED);
+            }
+        });
     }
 
     @Transactional
     public Optional<UserModel> updatePassword(String email, String password) {
+        return ifExistValid(email, new ChangeOnUser() {
+            @Override
+            public void change(UserModel userModel) {
+                userModel.setEncodedPassword(userPassword.encodePassword(email, password));
+            }
+        });
+    }
+
+    @Transactional
+    public Optional<UserModel> delete(String email) {
+        return ifExistValid(email, new ChangeOnUser() {
+
+            @Override
+            public void change(UserModel userModel) {
+                userModel.setUserState(UserState.DELETED);
+            }
+        });
+    }
+
+    public Optional<UserModel> ifExistValid(String email, ChangeOnUser changeOnUser) {
         Optional<UserModel> existant = getValidUserByEmail(email);
         if (existant.isPresent()) {
             UserModel userModel = existant.get();
-            userModel.setEncodedPassword(userPassword.encodePassword(email, password));
+            changeOnUser.change(userModel);
             entityManager.persist(userModel);
             entityManager.flush();
             return Optional.of(userModel);
         } else {
             return Optional.absent();
         }
-
     }
 }
