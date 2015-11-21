@@ -82,6 +82,30 @@ public class UserResource {
         }
     }
 
+    @GET
+    @Path(ResourcePath.USER_CREDENTIAL)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response login(
+            @Context HttpServletRequest httpServletRequest,
+            @PathParam(ResourcePath.P0) String email,
+            @PathParam(ResourcePath.P1) String password
+    ) {
+        log.info("login for {} {}", email, password);
+        final Optional<UserModel> validUserByEmail = userDao.getValidUserByEmail(email);
+        if (validUserByEmail.isPresent()) {
+            final UserModel userModel = validUserByEmail.get();
+
+            if (userPassword.validate(email, password, userModel.getEncodedPassword())) {
+                return apiResponse.ok();
+            } else {
+                return apiResponse.notFound();
+            }
+        } else {
+            return apiResponse.notFound();
+        }
+    }
+
     @DELETE
     @Path(ResourcePath.p_P0)
     @Produces(MediaType.APPLICATION_JSON)
