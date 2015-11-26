@@ -1,11 +1,14 @@
 package com.github.totoCastaldi.services.credential.rest.resource;
 
+import com.github.totoCastaldi.restServer.TimeProvider;
 import com.github.totoCastaldi.restServer.response.ApiResponse;
 import com.github.totoCastaldi.services.credential.rest.model.UserDao;
 import com.github.totoCastaldi.services.credential.rest.model.UserModel;
+import com.github.totoCastaldi.services.credential.rest.request.ChangePasswordRequest;
 import com.github.totoCastaldi.services.credential.rest.request.CreateUserRequest;
 import com.github.totoCastaldi.services.credential.rest.request.DeleteUserRequest;
 import com.github.totoCastaldi.services.credential.rest.response.CreateUserReponse;
+import com.github.totoCastaldi.services.credential.rest.response.EmptyResponse;
 import com.github.totoCastaldi.services.credential.rest.service.UserChange;
 import com.github.totoCastaldi.services.credential.rest.service.UserConfirmToken;
 import com.github.totoCastaldi.services.credential.rest.service.UserEmailActivation;
@@ -23,6 +26,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Date;
 
 /**
  * Created by github on 05/12/14.
@@ -37,6 +41,7 @@ public class UserResource {
     private final UserConfirmToken userConfirmToken;
     private final UserPassword userPassword;
     private final UserChange userChange;
+    private final TimeProvider timeProvider;
 
     @Inject
     public UserResource(
@@ -45,7 +50,8 @@ public class UserResource {
             UserEmailActivation userEmailActivation,
             UserConfirmToken userConfirmToken,
             UserPassword userPassword,
-            UserChange userChange
+            UserChange userChange,
+            TimeProvider timeProvider
     ) {
         this.apiResponse = apiResponse;
         this.userDao = userDao;
@@ -53,6 +59,7 @@ public class UserResource {
         this.userConfirmToken = userConfirmToken;
         this.userPassword = userPassword;
         this.userChange = userChange;
+        this.timeProvider = timeProvider;
     }
 
     @POST
@@ -65,10 +72,13 @@ public class UserResource {
         Optional<UserModel> userCreationOptional = userDao.create(request.getEmail(), request.getPassword(), request.getUrlNotifier());
         if (userCreationOptional.isPresent()) {
             final UserModel userModel = userCreationOptional.get();
-            final String token = userConfirmToken.generateToken(userModel.getEmail());
+            final Date now = timeProvider.now();
+            final String email = userModel.getEmail();
+            final String token = userConfirmToken.generateToken(email, now);
+            userDao.confirmTokenGenerated(email, now);
             boolean proceed = BooleanUtils.isTrue(request.getSkipEmailSend());
             if (!proceed) {
-                proceed = userEmailActivation.sendEmail(userModel.getEmail(), token, request.getUrlBaseConfirm());
+                proceed = userEmailActivation.sendEmail(email, token, request.getUrlBaseConfirm());
             }
             if (proceed) {
                 CreateUserReponse createUserReponse = CreateUserReponse.of(token);
@@ -97,7 +107,35 @@ public class UserResource {
             final UserModel userModel = validUserByEmail.get();
 
             if (userPassword.validate(email, password, userModel.getEncodedPassword())) {
-                return apiResponse.ok();
+                return apiResponse.ok(new EmptyResponse());
+            } else {
+                return apiResponse.notFound();
+            }
+        } else {
+            return apiResponse.notFound();
+        }
+    }
+
+    @PUT
+    @Path(ResourcePath.p_P0)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response changePassword(
+            @Context HttpServletRequest httpServletRequest,
+            @PathParam(ResourcePath.P0) String email,
+            @NotNull @Valid ChangePasswordRequest request
+    ) {
+        log.info("change password {} {}", email, request);
+        final Optional<UserModel> validUserByEmail = userDao.getValidUserByEmail(email);
+        if (validUserByEmail.isPresent()) {
+            final UserModel userModel = validUserByEmail.get();
+
+            if (userPassword.validate(email, request.getOldPassword(), userModel.getEncodedPassword())) {
+                if (userDao.updatePassword(email, request.getNewPassword()).isPresent()) {
+                    return apiResponse.ok(new EmptyResponse());
+                } else {
+                    return apiResponse.notFound();
+                }
             } else {
                 return apiResponse.notFound();
             }
@@ -124,7 +162,7 @@ public class UserResource {
                     if (StringUtils.isNotBlank(userModel.getUrlNotifier())) {
                         userChange.notifyExternalService(userModel.getUrlNotifier());
                     }
-                    return apiResponse.ok();
+                    return apiResponse.ok(new EmptyResponse());
                 } else {
                     return apiResponse.notFound();
                 }

@@ -1,10 +1,12 @@
 package com.github.totoCastaldi.services.credential.rest.resource;
 
+import com.github.totoCastaldi.restServer.TimeProvider;
 import com.github.totoCastaldi.restServer.response.ApiResponse;
 import com.github.totoCastaldi.services.credential.rest.model.UserDao;
 import com.github.totoCastaldi.services.credential.rest.model.UserModel;
 import com.github.totoCastaldi.services.credential.rest.request.PasswordLostRequest;
 import com.github.totoCastaldi.services.credential.rest.request.ResetPasswordRequest;
+import com.github.totoCastaldi.services.credential.rest.response.EmptyResponse;
 import com.github.totoCastaldi.services.credential.rest.response.PasswordLostResponse;
 import com.github.totoCastaldi.services.credential.rest.service.UserChange;
 import com.github.totoCastaldi.services.credential.rest.service.UserEmailPasswordLost;
@@ -22,6 +24,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Date;
 
 /**
  * Created by github on 05/12/14.
@@ -35,6 +38,7 @@ public class PasswordLostResource {
     private final UserPasswordLostToken userPasswordLostToken;
     private final UserEmailPasswordLost userEmailPasswordLost;
     private final UserChange userChange;
+    private final TimeProvider timeProvider;
 
     @Inject
     public PasswordLostResource(
@@ -42,13 +46,15 @@ public class PasswordLostResource {
             UserDao userDao,
             UserPasswordLostToken userPasswordLostToken,
             UserEmailPasswordLost userEmailPasswordLost,
-            UserChange userChange
+            UserChange userChange,
+            TimeProvider timeProvider
     ) {
         this.apiResponse = apiResponse;
         this.userDao = userDao;
         this.userPasswordLostToken = userPasswordLostToken;
         this.userEmailPasswordLost = userEmailPasswordLost;
         this.userChange = userChange;
+        this.timeProvider = timeProvider;
     }
 
     @POST
@@ -65,7 +71,10 @@ public class PasswordLostResource {
         final Optional<UserModel> userModelOptional = userDao.getValidUserByEmail(email);
 
         if (userModelOptional.isPresent()) {
-            final String token = userPasswordLostToken.generateToken(email);
+            final Date now = timeProvider.now();
+            final String token = userPasswordLostToken.generateToken(email, now);
+
+            userDao.passwordLostTokenGenerated(email,now);
 
             boolean proceed = BooleanUtils.isTrue(request.getSkipEmailSend());
             if (!proceed) {
@@ -96,14 +105,14 @@ public class PasswordLostResource {
         final String email = request.getEmail();
 
         final Optional<UserModel> userModelOptional = userDao.getValidUserByEmail(email);
-        if (userModelOptional.isPresent()) {
-            if (userPasswordLostToken.isCorrect(email, token)) {
+        if (userModelOptional.isPresent() && userModelOptional.get().getPasswordLostTokenCreation() != null) {
+            if (userPasswordLostToken.isCorrect(email, token, userModelOptional.get().getPasswordLostTokenCreation())) {
                 if (userDao.updatePassword(email, request.getPassword()).isPresent()) {
                     final UserModel userModel = userModelOptional.get();
                     if (StringUtils.isNotBlank(userModel.getUrlNotifier())) {
                         userChange.notifyExternalService(userModel.getUrlNotifier());
                     }
-                    return apiResponse.ok();
+                    return apiResponse.ok(new EmptyResponse());
                 } else {
                     return apiResponse.notFound();
                 }

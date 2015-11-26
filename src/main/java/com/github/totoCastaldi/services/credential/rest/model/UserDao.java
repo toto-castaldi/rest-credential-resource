@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import java.util.Date;
 
 /**
  * Created by toto on 14/11/15.
@@ -30,6 +31,26 @@ public class UserDao {
         this.entityManager = entityManager;
         this.userPassword = userPassword;
         this.timeProvider = timeProvider;
+    }
+
+    @Transactional
+    public Optional<UserModel> passwordLostTokenGenerated(String email, Date now) {
+        return ifExistValid(email, new ChangeOnUser() {
+            @Override
+            public void change(UserModel userModel) {
+                userModel.setPasswordLostTokenCreation(now);
+            }
+        });
+    }
+
+    @Transactional
+    public Optional<UserModel> confirmTokenGenerated(String email, Date now) {
+        return ifExistValid(email, new ChangeOnUser() {
+            @Override
+            public void change(UserModel userModel) {
+                userModel.setConfirmTokenCreation(now);
+            }
+        });
     }
 
     public static interface ChangeOnUser {
@@ -77,6 +98,7 @@ public class UserDao {
             @Override
             public void change(UserModel userModel) {
                 userModel.setUserState(UserState.CONFIRMED);
+                userModel.setConfirmTokenCreation(null);
             }
         });
     }
@@ -87,6 +109,7 @@ public class UserDao {
             @Override
             public void change(UserModel userModel) {
                 userModel.setEncodedPassword(userPassword.encodePassword(email, password));
+                userModel.setPasswordLostTokenCreation(null);
             }
         });
     }

@@ -45,6 +45,14 @@ public class UserModel {
     private Date deletionDate;
 
     @Setter
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date confirmTokenCreation;
+
+    @Setter
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date passwordLostTokenCreation;
+
+    @Setter
     @Enumerated (EnumType.STRING)
     private UserState userState;
 }
