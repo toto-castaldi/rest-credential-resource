@@ -3,6 +3,9 @@ rest-credential-resource
 
 ![logo](http://toto-castaldi.github.io/cdn/images/rest-credential-resource-logo.png "http://logomakr.com/0BKsDJ")
 
+## Develop / Debug 
+
+### Aws access
 ``` 
 > ssh -i [PEM] [AWS-USER]@[AWS-IP] -L9999:[RDS-NAME]:5432
 > psql -p 9999 -h localhost -W -U restCredentialRe ebdb
