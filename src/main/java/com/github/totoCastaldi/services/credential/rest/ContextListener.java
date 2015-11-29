@@ -2,7 +2,8 @@ package com.github.totoCastaldi.services.credential.rest;
 
 import com.github.totoCastaldi.restServer.ApiServletContextListener;
 import com.github.totoCastaldi.restServer.RestServerConf;
-import com.github.totoCastaldi.restServer.plugin.PersistenModule;
+import com.github.totoCastaldi.restServer.plugin.MashapePlugin;
+import com.github.totoCastaldi.restServer.plugin.PersistencePlugin;
 import com.github.totoCastaldi.services.credential.rest.model.UserDao;
 import com.github.totoCastaldi.services.credential.rest.resource.UserResource;
 import com.github.totoCastaldi.services.credential.rest.service.*;
@@ -26,7 +27,10 @@ public class ContextListener extends ApiServletContextListener {
                 bind(UserChange.class);
             }
         });
-        builder.add(new PersistenModule());
+
+        builder.add(new PersistencePlugin());
+        builder.add(new MashapePlugin("X-Mashape-Proxy-Secret"));
+
         builder.addStringConf(Conf.PASSWORD_SEED);
         builder.addStringConf(Conf.MAIL_USERNAME);
         builder.addStringConf(Conf.MAIL_PASSWORD);

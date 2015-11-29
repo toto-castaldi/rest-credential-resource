@@ -19,12 +19,17 @@
         <dependency>
             <groupId>com.github.toto-castaldi.services.restServer</groupId>
             <artifactId>core</artifactId>
-            <version>1.1</version>
+            <version>1.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.github.toto-castaldi.services.restServer</groupId>
             <artifactId>plugin-persistence</artifactId>
-            <version>1.1</version>
+            <version>1.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.toto-castaldi.services.restServer</groupId>
+            <artifactId>plugin-mashape</artifactId>
+            <version>1.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
