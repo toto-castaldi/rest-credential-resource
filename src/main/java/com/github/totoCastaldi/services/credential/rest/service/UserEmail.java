@@ -33,6 +33,7 @@ public abstract class UserEmail {
     }
 
     public boolean sendEmail(String emailAddress)  {
+        log.info("send email request to {}", emailAddress);
         Email email = new SimpleEmail();
         email.setHostName("smtp.googlemail.com");
         email.setSmtpPort(465);
@@ -45,7 +46,7 @@ public abstract class UserEmail {
             email.addTo(emailAddress);
             final String sendResult = email.send();
 
-            log.info("sending email {}", sendResult);
+            log.info("send email result {}", sendResult);
 
             return true;
         } catch (EmailException e) {

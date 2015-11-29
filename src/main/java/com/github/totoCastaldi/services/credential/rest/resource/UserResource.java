@@ -68,17 +68,26 @@ public class UserResource {
             @Context HttpServletRequest httpServletRequest,
             @NotNull @Valid CreateUserRequest request
     ) {
+        log.info("create user {}", request);
         Optional<UserModel> userCreationOptional = userDao.create(request.getEmail(), request.getPassword(), request.getUrlNotifier());
         if (userCreationOptional.isPresent()) {
+            log.info("user created");
             final UserModel userModel = userCreationOptional.get();
             final Date now = timeProvider.now();
             final String email = userModel.getEmail();
             final String token = userConfirmToken.generateToken(email, now);
             userDao.confirmTokenGenerated(email, now);
-            boolean proceed = StringUtils.isNotBlank(request.getUrlBaseConfirm());
-            if (!proceed) {
+            boolean sendConfirmEmail = StringUtils.isNotBlank(request.getUrlBaseConfirm());
+            boolean proceed;
+
+            log.info("email sendConfirmEmail {}", sendConfirmEmail);
+
+            if (sendConfirmEmail) {
                 proceed = userEmailActivation.sendEmail(email, token, request.getUrlBaseConfirm());
+            } else {
+                proceed = true;
             }
+
             if (proceed) {
                 CreateUserReponse createUserReponse = CreateUserReponse.of(token);
                 return apiResponse.createdReturns(httpServletRequest, createUserReponse, ResourcePath.USER, String.valueOf(userModel.getId()));
