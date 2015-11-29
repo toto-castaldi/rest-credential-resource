@@ -4,6 +4,7 @@ import com.github.totoCastaldi.restServer.TimeProvider;
 import com.github.totoCastaldi.restServer.response.ApiResponse;
 import com.github.totoCastaldi.services.credential.rest.model.UserDao;
 import com.github.totoCastaldi.services.credential.rest.model.UserModel;
+import com.github.totoCastaldi.services.credential.rest.model.UserState;
 import com.github.totoCastaldi.services.credential.rest.request.ChangePasswordRequest;
 import com.github.totoCastaldi.services.credential.rest.request.CreateUserRequest;
 import com.github.totoCastaldi.services.credential.rest.request.DeleteUserRequest;
@@ -110,7 +111,7 @@ public class UserResource {
             @NotNull @Valid ChangePasswordRequest request
     ) {
         log.info("change password {} {}", email, request);
-        final Optional<UserModel> validUserByEmail = userDao.getValidUserByEmail(email);
+        final Optional<UserModel> validUserByEmail = userDao.getNotDeleted(email);
         if (validUserByEmail.isPresent()) {
             final UserModel userModel = validUserByEmail.get();
 
@@ -138,8 +139,8 @@ public class UserResource {
             @PathParam(ResourcePath.P1) String password
     ) {
         log.info("login for {} {}", email, password);
-        final Optional<UserModel> validUserByEmail = userDao.getValidUserByEmail(email);
-        if (validUserByEmail.isPresent()) {
+        final Optional<UserModel> validUserByEmail = userDao.getNotDeleted(email);
+        if (validUserByEmail.isPresent() && validUserByEmail.get().getUserState() == UserState.CONFIRMED) {
             final UserModel userModel = validUserByEmail.get();
 
             if (userPassword.validate(email, password, userModel.getEncodedPassword())) {
@@ -161,7 +162,7 @@ public class UserResource {
             @PathParam(ResourcePath.P0) String email
     ) {
         log.info("check user for {} {}", email);
-        final Optional<UserModel> validUserByEmail = userDao.getValidUserByEmail(email);
+        final Optional<UserModel> validUserByEmail = userDao.getNotDeleted(email);
         if (validUserByEmail.isPresent()) {
                 return apiResponse.ok(new EmptyResponse());
         } else {
@@ -179,7 +180,7 @@ public class UserResource {
             @NotNull @Valid DeleteUserRequest request
     ) {
         log.info("delete user {} {}", email, request);
-        Optional<UserModel> userModelOptional = userDao.getValidUserByEmail(email);
+        Optional<UserModel> userModelOptional = userDao.getNotDeleted(email);
         if (userModelOptional.isPresent()) {
             final UserModel userModel = userModelOptional.get();
             if (userPassword.validate(email, request.getPassword(), userModel.getEncodedPassword())) {

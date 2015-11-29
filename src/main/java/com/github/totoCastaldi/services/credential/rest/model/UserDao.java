@@ -64,7 +64,7 @@ public class UserDao {
             String password,
             String urlNotifier
     ) {
-        Optional<UserModel> existant = getValidUserByEmail(email);
+        Optional<UserModel> existant = getNotDeleted(email);
         if (existant.isPresent()) {
             return Optional.absent();
         } else {
@@ -80,7 +80,7 @@ public class UserDao {
         }
     }
 
-    public Optional<UserModel> getValidUserByEmail(String email) {
+    public Optional<UserModel> getNotDeleted(String email) {
         Query query = entityManager.createNamedQuery(UserModel.NQfindByEmail);
         query.setParameter("email", email);
         return Optional.fromNullable((UserModel) Iterables.getFirst(Iterables.filter(query.getResultList(), new Predicate() {
@@ -126,7 +126,7 @@ public class UserDao {
     }
 
     public Optional<UserModel> ifExistValid(String email, ChangeOnUser changeOnUser) {
-        Optional<UserModel> existant = getValidUserByEmail(email);
+        Optional<UserModel> existant = getNotDeleted(email);
         if (existant.isPresent()) {
             UserModel userModel = existant.get();
             changeOnUser.change(userModel);

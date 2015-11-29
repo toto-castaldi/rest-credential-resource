@@ -68,7 +68,7 @@ public class PasswordLostResource {
 
         final String email = request.getEmail();
 
-        final Optional<UserModel> userModelOptional = userDao.getValidUserByEmail(email);
+        final Optional<UserModel> userModelOptional = userDao.getNotDeleted(email);
 
         if (userModelOptional.isPresent()) {
             final Date now = timeProvider.now();
@@ -104,7 +104,7 @@ public class PasswordLostResource {
 
         final String email = request.getEmail();
 
-        final Optional<UserModel> userModelOptional = userDao.getValidUserByEmail(email);
+        final Optional<UserModel> userModelOptional = userDao.getNotDeleted(email);
         if (userModelOptional.isPresent() && userModelOptional.get().getPasswordLostTokenCreation() != null) {
             if (userPasswordLostToken.isCorrect(email, token, userModelOptional.get().getPasswordLostTokenCreation())) {
                 if (userDao.updatePassword(email, request.getPassword()).isPresent()) {
