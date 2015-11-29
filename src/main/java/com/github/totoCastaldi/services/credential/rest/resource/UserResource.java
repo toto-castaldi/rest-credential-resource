@@ -15,7 +15,6 @@ import com.github.totoCastaldi.services.credential.rest.service.UserEmailActivat
 import com.github.totoCastaldi.services.credential.rest.service.UserPassword;
 import com.google.common.base.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 
 import javax.inject.Inject;
@@ -76,7 +75,7 @@ public class UserResource {
             final String email = userModel.getEmail();
             final String token = userConfirmToken.generateToken(email, now);
             userDao.confirmTokenGenerated(email, now);
-            boolean proceed = BooleanUtils.isTrue(request.getSkipEmailSend());
+            boolean proceed = StringUtils.isNotBlank(request.getUrlBaseConfirm());
             if (!proceed) {
                 proceed = userEmailActivation.sendEmail(email, token, request.getUrlBaseConfirm());
             }
@@ -88,7 +87,35 @@ public class UserResource {
             }
         } else {
             //already exist but return a generic error in order to hide data
-            return apiResponse.badResponse();
+            return apiResponse.badResponse("user already exist");
+        }
+    }
+
+    @PUT
+    @Path(ResourcePath.p_P0)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response changePassword(
+            @Context HttpServletRequest httpServletRequest,
+            @PathParam(ResourcePath.P0) String email,
+            @NotNull @Valid ChangePasswordRequest request
+    ) {
+        log.info("change password {} {}", email, request);
+        final Optional<UserModel> validUserByEmail = userDao.getValidUserByEmail(email);
+        if (validUserByEmail.isPresent()) {
+            final UserModel userModel = validUserByEmail.get();
+
+            if (userPassword.validate(email, request.getOldPassword(), userModel.getEncodedPassword())) {
+                if (userDao.updatePassword(email, request.getNewPassword()).isPresent()) {
+                    return apiResponse.ok(new EmptyResponse());
+                } else {
+                    return apiResponse.notFound();
+                }
+            } else {
+                return apiResponse.notFound();
+            }
+        } else {
+            return apiResponse.notFound();
         }
     }
 
@@ -116,29 +143,18 @@ public class UserResource {
         }
     }
 
-    @PUT
+    @GET
     @Path(ResourcePath.p_P0)
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response changePassword(
+    public Response check(
             @Context HttpServletRequest httpServletRequest,
-            @PathParam(ResourcePath.P0) String email,
-            @NotNull @Valid ChangePasswordRequest request
+            @PathParam(ResourcePath.P0) String email
     ) {
-        log.info("change password {} {}", email, request);
+        log.info("check user for {} {}", email);
         final Optional<UserModel> validUserByEmail = userDao.getValidUserByEmail(email);
         if (validUserByEmail.isPresent()) {
-            final UserModel userModel = validUserByEmail.get();
-
-            if (userPassword.validate(email, request.getOldPassword(), userModel.getEncodedPassword())) {
-                if (userDao.updatePassword(email, request.getNewPassword()).isPresent()) {
-                    return apiResponse.ok(new EmptyResponse());
-                } else {
-                    return apiResponse.notFound();
-                }
-            } else {
-                return apiResponse.notFound();
-            }
+                return apiResponse.ok(new EmptyResponse());
         } else {
             return apiResponse.notFound();
         }

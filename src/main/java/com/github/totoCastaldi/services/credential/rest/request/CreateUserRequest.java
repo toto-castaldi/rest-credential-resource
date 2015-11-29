@@ -24,7 +24,5 @@ public class CreateUserRequest {
     @NotBlank
     private String password;
     private String urlNotifier;
-    @NotBlank
     private String urlBaseConfirm;
-    private Boolean skipEmailSend;
 }
