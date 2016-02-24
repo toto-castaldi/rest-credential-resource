@@ -6,16 +6,23 @@ rest-credential-resource
 ## Develop 
 
 add on your jvm run :
+
+```
+> //Run a Postgres instance
+> docker rm some-postgres && docker run --name some-postgres -p 5432:5432  -e POSTGRES_PASSWORD=mysecretpassword  postgres
+```
+
 ```
 -DMAIL_USERNAME="[ADDRESS]@gmail.com"
 -DMAIL_PASSWORD="[GMAI-PASSWORD]"
 -DMAIL_ADDRESS="[ADDRESS]@gmail.com"
--DRDS_USERNAME="[DB-USER]"
--DRDS_PASSWORD="[DB-PASSWORD]"
--DRDS_HOSTNAME="[DB-HOST]"
--DRDS_PORT="[DB-PORT]"
--DRDS_DB_NAME="[DB-NAME]"
+-DRDS_USERNAME=postgres
+-DRDS_PASSWORD=mysecretpassword
+-DRDS_HOSTNAME=localhost
+-DRDS_PORT=5432
+-DRDS_DB_NAME=postgres
 ```
+
 
 ### Aws Prod access
 ``` 
