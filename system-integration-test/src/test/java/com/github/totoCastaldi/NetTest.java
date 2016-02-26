@@ -15,7 +15,7 @@ public class NetTest {
 
     @Test
     public void ping() throws IOException, SQLException, ClassNotFoundException, InterruptedException {
-        final Rest rest = new Rest("localhost", 8080).setContext("/credential").addHeader("x-mashape-proxy-secret", "setit");
+        final Rest rest = Services.credentialRest();
 
         final HttpResource service = rest.get("/service");
         final int responseCode = service.getResponseCode();
