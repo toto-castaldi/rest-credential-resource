@@ -10,5 +10,9 @@ public class Conf {
     public static final String MAIL_ADDRESS = "MAIL_ADDRESS";
     public static final String CONFIRM_TOKEN_SEED = "CONFIRM_TOKEN_SEED";
     public static final String PASSWORD_LOST_TOKEN_SEED = "PASSWORD_LOST_TOKEN_SEED";
+    public static final String MAIL_HOST = "MAIL_HOST";
+    public static final String MAIL_PORT = "MAIL_PORT";
+    public static final String MAIL_AUTHENTICATE = "MAIL_AUTHENTICATE";
+    public static final String MAIL_SSL_ON_CONNECT = "MAIL_SSL_ON_CONNECT";
 
 }

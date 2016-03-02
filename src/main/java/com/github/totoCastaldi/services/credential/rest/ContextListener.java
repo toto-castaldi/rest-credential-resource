@@ -37,6 +37,10 @@ public class ContextListener extends ApiServletContextListener {
         builder.addStringConf(Conf.MAIL_ADDRESS);
         builder.addStringConf(Conf.CONFIRM_TOKEN_SEED);
         builder.addStringConf(Conf.PASSWORD_LOST_TOKEN_SEED);
+        builder.addStringConf(Conf.MAIL_HOST);
+        builder.addIntConf(Conf.MAIL_PORT);
+        builder.addBooleanConf(Conf.MAIL_AUTHENTICATE);
+        builder.addBooleanConf(Conf.MAIL_SSL_ON_CONNECT);
         return builder.build();
     }
 }

@@ -12,7 +12,7 @@ printf "wait postgres start ."
 status=1
 while [[ status -ne 0 ]]; do
   sleep 1
-  docker run -v `pwd`:/data -it --link some-postgres:postgres --rm postgres sh -c 'export PGPASSWORD=developer && export PGUSER=developer && psql -h $POSTGRES_PORT_5432_TCP_ADDR developer < /data/ping.sql > /dev/null 2>&1'
+  docker run -v `pwd`:/data -it --link some-postgres:postgres --rm postgres sh -c 'export PGPASSWORD=$POSTGRES_ENV_POSTGRES_PASSWORD && export PGUSER=$POSTGRES_ENV_POSTGRES_USER && psql -h $POSTGRES_PORT_5432_TCP_ADDR $POSTGRES_ENV_POSTGRES_DB < /data/ping.sql > /dev/null 2>&1'
   status=$?
   printf "."
 done

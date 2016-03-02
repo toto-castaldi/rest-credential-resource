@@ -20,25 +20,41 @@ public abstract class UserEmail {
     private final String emailAddress;
     private final String emailUsername;
     private final String emailPassword;
+    private final String smtpServer;
+    private final int smtpPort;
+    private final boolean authenticate;
+    private final boolean sslOnConnect;
 
     public UserEmail(
            String emailAddress,
            String emailUsername,
-           String emailPassword
+           String emailPassword,
+           String smtpServer,
+           int smtpPort,
+           boolean authenticate,
+           boolean sslOnConnect
     ) {
 
         this.emailAddress = emailAddress;
         this.emailUsername = emailUsername;
         this.emailPassword = emailPassword;
+        this.smtpServer = smtpServer;
+        this.smtpPort = smtpPort;
+        this.authenticate = authenticate;
+        this.sslOnConnect = sslOnConnect;
     }
 
     public boolean sendEmail(String emailAddress)  {
         log.info("send email request to {}", emailAddress);
         Email email = new SimpleEmail();
-        email.setHostName("smtp.googlemail.com");
-        email.setSmtpPort(465);
-        email.setAuthenticator(new DefaultAuthenticator(emailUsername, emailPassword));
-        email.setSSLOnConnect(true);
+        email.setHostName(smtpServer);
+        email.setSmtpPort(smtpPort);
+        if (authenticate) {
+            email.setAuthenticator(new DefaultAuthenticator(emailUsername, emailPassword));
+        }
+        if (sslOnConnect) {
+            email.setSSLOnConnect(true);
+        }
         try {
             email.setFrom(emailAddress);
             email.setSubject(getSubject());

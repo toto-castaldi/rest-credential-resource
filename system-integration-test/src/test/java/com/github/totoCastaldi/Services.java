@@ -1,6 +1,7 @@
 package com.github.totoCastaldi;
 
 import com.github.totoCastaldi.integration.db.Postgresql;
+import com.github.totoCastaldi.integration.mail.SmtpServer;
 import com.github.totoCastaldi.integration.net.Header;
 import com.github.totoCastaldi.integration.net.Rest;
 
@@ -19,6 +20,10 @@ public class Services {
     }
 
     public static Postgresql postgresql() {
-        return new Postgresql("localhost", "developer", "developer", "developer");
+        return new Postgresql("localhost", "developer", "developer", "developer", 5432);
+    }
+
+    public static SmtpServer smtp() {
+        return SmtpServer.start(2525);
     }
 }
