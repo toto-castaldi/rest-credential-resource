@@ -5,6 +5,7 @@ start=`date +%s`
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 ./start-postgresql.sh
+./start-simple-smtp.sh
 ./start-credential.sh
 
 end=`date +%s`

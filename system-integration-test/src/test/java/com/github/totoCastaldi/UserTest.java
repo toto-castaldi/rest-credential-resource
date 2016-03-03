@@ -2,8 +2,8 @@ package com.github.totoCastaldi;
 
 
 import com.github.totoCastaldi.integration.db.Postgresql;
-import com.github.totoCastaldi.integration.mail.SmtpMessage;
-import com.github.totoCastaldi.integration.mail.SmtpServer;
+import com.github.totoCastaldi.integration.mail.SimpleSmtpMessage;
+import com.github.totoCastaldi.integration.mail.SimpleSmtpServer;
 import com.github.totoCastaldi.integration.net.HttpResource;
 import com.github.totoCastaldi.integration.net.Rest;
 import com.github.totoCastaldi.integration.templates.JSONTemplate;
@@ -16,7 +16,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Iterator;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -24,15 +23,15 @@ import static org.junit.internal.matchers.StringContains.containsString;
 
 public class UserTest {
 
-    private static SmtpServer smtpServer;
+    private static SimpleSmtpServer smtpServer;
 
     @BeforeClass
     public static void smtpStart() throws SQLException, ClassNotFoundException {
-        smtpServer = Services.smtp();
+        smtpServer = Services.simpleSmtp();
     }
 
     @Before
-    public void firstUser() throws SQLException, ClassNotFoundException {
+    public void firstUser() throws SQLException, ClassNotFoundException, IOException {
         final Postgresql postgresql = Services.postgresql();
         postgresql.emptyTable("user_credential");
 
@@ -67,12 +66,16 @@ public class UserTest {
 
         assertThat(responseCode, equalTo(201));
 
-        final Collection<SmtpMessage> receivedEmail = smtpServer.getReceivedEmail();
+        final Collection<SimpleSmtpMessage> receivedEmail = smtpServer.getReceivedEmail();
 
         assertThat(receivedEmail.size(), equalTo(1));
 
-        final SmtpMessage smtpMessage = receivedEmail.iterator().next();
-        assertThat(smtpMessage.getBody(), containsString("toto.castaldi%2B1%40gmail.com"));
+        final SimpleSmtpMessage smtpMessage = receivedEmail.iterator().next();
+
+        final String body = smtpMessage.getBody();
+        System.out.println(body);
+
+        assertThat(body, containsString("toto.castaldi%2B1%40gmail.com"));
     }
 
 

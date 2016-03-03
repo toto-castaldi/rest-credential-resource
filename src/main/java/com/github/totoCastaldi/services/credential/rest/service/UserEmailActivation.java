@@ -2,11 +2,6 @@ package com.github.totoCastaldi.services.credential.rest.service;
 
 import com.github.totoCastaldi.services.credential.rest.Conf;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.mail.DefaultAuthenticator;
-import org.apache.commons.mail.Email;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
 
 import javax.inject.Inject;
 import javax.inject.Named;

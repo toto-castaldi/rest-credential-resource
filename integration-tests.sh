@@ -6,6 +6,8 @@ start=`date +%s`
 
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 
+./docker-build.sh
+
 ./start-services.sh
 cd system-integration-test
 mvn clean install

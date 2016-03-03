@@ -4,7 +4,7 @@ start=`date +%s`
 
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 
-docker stop some-com-github-toto-castaldi-rest-credential-resource; docker rm some-com-github-toto-castaldi-rest-credential-resource; docker run --name some-com-github-toto-castaldi-rest-credential-resource -v `pwd`:/data --link some-postgres:postgres -p 8080:8080 -d com-github-toto-castaldi-rest-credential-resource
+docker stop some-com-github-toto-castaldi-rest-credential-resource; docker rm some-com-github-toto-castaldi-rest-credential-resource; docker run --name some-com-github-toto-castaldi-rest-credential-resource -v `pwd`:/data --link some-postgres:postgres --link some-com-github-toto-castaldi-simple-smtp-server:com-github-toto-castaldi-simple-smtp-server -p 8080:8080 -d com-github-toto-castaldi-rest-credential-resource
 #wait
 printf "wait credential start ."
 status=1
