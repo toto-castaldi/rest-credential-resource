@@ -52,7 +52,7 @@ public class UserEmailPasswordLost {
             @Override
             protected String getMessage() {
                 try {
-                    return "Click here to reset password here " + urlBaseConfirm + "?" + URLEncoder.encode("e=" + emailAddress + "&t=" + token, "UTF-8");
+                    return "Click here to reset password here " + urlBaseConfirm + "?e=" + URLEncoder.encode(emailAddress, "UTF-8") + "&t=" + token;
                 } catch (UnsupportedEncodingException e) {
                     throw new RuntimeException(e);
                 }

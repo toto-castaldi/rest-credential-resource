@@ -47,7 +47,7 @@ public class UserEmailActivation {
             @Override
             protected String getMessage() {
                 try {
-                    return "Confirm here " + urlBaseConfirm + "?" + URLEncoder.encode("e=" + emailAddress + "&t=" + token, "UTF-8");
+                    return "Confirm here " + urlBaseConfirm + "?e=" + URLEncoder.encode(emailAddress, "UTF-8") + "&t=" + token;
                 } catch (UnsupportedEncodingException e) {
                     throw new RuntimeException(e);
                 }
